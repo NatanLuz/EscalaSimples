@@ -1,0 +1,7 @@
+{
+  "private": true,
+  "type": "module",
+  "scripts": { "build": "node build.mjs", "dev": "node build.mjs --watch" },
+  "dependencies": { "@inertiajs/react": "^2.0.0", "react": "^19.0.0", "react-dom": "^19.0.0" },
+  "devDependencies": { "@tailwindcss/cli": "^4.0.0", "esbuild": "^0.25.0", "tailwindcss": "^4.0.0" }
+}

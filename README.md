@@ -40,4 +40,8 @@ Essa proteção cobre os testes Laravel que estendem `Tests\TestCase`; não prot
 
 ## Decisões e próximos passos
 
-O projeto é um monólito Laravel com React integrado por Inertia, sem API separada e sem Vite. Nenhum dado real deve ser usado enquanto autenticação e isolamento por empresa não forem implementados e testados. A próxima etapa recomendada é definir o modelo de empresa e conta administrativa, implementar autenticação e comprovar o isolamento entre empresas com testes automatizados.
+Cada empresa tem no máximo um usuário administrador no MVP; a restrição única em `users.company_id` deverá ser revista quando houver suporte a mais contas. A criação de empresa e administrador ocorre em transação no serviço `CreateCompanyWithAdministrator`, que recebe dados já validados. Não há autenticação ou autorização implementadas nesta etapa.
+
+As migrations de empresas recusam a execução se houver usuários existentes; nesses casos é necessário planejar a associação dos registros antes de aplicar as mudanças. Execute migrations apenas após confirmar o banco de destino e seu conteúdo.
+
+O projeto é um monólito Laravel com React integrado por Inertia, sem API separada e sem Vite. Nenhum dado real deve ser usado enquanto autenticação e isolamento por empresa não forem implementados e testados. A próxima etapa recomendada é implementar autenticação e comprovar o isolamento entre empresas com testes automatizados.

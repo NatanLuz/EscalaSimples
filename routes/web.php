@@ -3,6 +3,8 @@
 use App\Http\Controllers\Auth\AuthenticationController;
 use App\Http\Controllers\Auth\RegistrationController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\DepartmentController;
+use App\Http\Controllers\EmployeeController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
@@ -22,4 +24,6 @@ Route::middleware('guest')->group(function () {
 Route::middleware('auth')->group(function () {
     Route::get('/dashboard', DashboardController::class)->name('dashboard');
     Route::post('/logout', [AuthenticationController::class, 'destroy'])->name('logout');
+    Route::resource('setores', DepartmentController::class)->parameters(['setores' => 'department'])->except(['show', 'destroy'])->names('departments');
+    Route::resource('colaboradores', EmployeeController::class)->parameters(['colaboradores' => 'employee'])->except(['show', 'destroy'])->names('employees');
 });

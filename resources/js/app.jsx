@@ -6,8 +6,12 @@ import Sobre from './Pages/Sobre.jsx';
 import Login from './Pages/Auth/Login.jsx';
 import Register from './Pages/Auth/Register.jsx';
 import Dashboard from './Pages/Dashboard.jsx';
+import DepartmentIndex from './Pages/Departments/Index.jsx';
+import DepartmentForm from './Pages/Departments/Form.jsx';
+import EmployeeIndex from './Pages/Employees/Index.jsx';
+import EmployeeForm from './Pages/Employees/Form.jsx';
 
-const pages = { Home, Sobre, 'Auth/Login': Login, 'Auth/Register': Register, Dashboard };
+const pages = { Home, Sobre, 'Auth/Login': Login, 'Auth/Register': Register, Dashboard, 'Departments/Index': DepartmentIndex, 'Departments/Form': DepartmentForm, 'Employees/Index': EmployeeIndex, 'Employees/Form': EmployeeForm };
 createInertiaApp({
   resolve: name => {
     if (!pages[name]) throw new Error(`Página desconhecida: ${name}`);

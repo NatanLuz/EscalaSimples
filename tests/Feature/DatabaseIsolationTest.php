@@ -19,10 +19,10 @@ class DatabaseIsolationTest extends TestCase
         $this->assertSame(['sqlite'], array_keys(config('database.connections')));
         $this->assertSame(1, DB::selectOne('PRAGMA foreign_keys')->foreign_keys);
 
-        foreach (['companies', 'departments', 'employees', 'users', 'password_reset_tokens', 'sessions', 'cache', 'cache_locks', 'jobs', 'job_batches', 'failed_jobs'] as $table) {
+        foreach (['companies', 'departments', 'employees', 'employee_imports', 'users', 'password_reset_tokens', 'sessions', 'cache', 'cache_locks', 'jobs', 'job_batches', 'failed_jobs'] as $table) {
             $this->assertTrue(Schema::hasTable($table), "Tabela ausente: {$table}");
         }
 
-        $this->assertSame(7, DB::table('migrations')->count());
+        $this->assertSame(8, DB::table('migrations')->count());
     }
 }

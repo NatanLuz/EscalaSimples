@@ -10,8 +10,9 @@ import DepartmentIndex from './Pages/Departments/Index.jsx';
 import DepartmentForm from './Pages/Departments/Form.jsx';
 import EmployeeIndex from './Pages/Employees/Index.jsx';
 import EmployeeForm from './Pages/Employees/Form.jsx';
+import EmployeeImport from './Pages/Employees/Import.jsx';
 
-const pages = { Home, Sobre, 'Auth/Login': Login, 'Auth/Register': Register, Dashboard, 'Departments/Index': DepartmentIndex, 'Departments/Form': DepartmentForm, 'Employees/Index': EmployeeIndex, 'Employees/Form': EmployeeForm };
+const pages = { Home, Sobre, 'Auth/Login': Login, 'Auth/Register': Register, Dashboard, 'Departments/Index': DepartmentIndex, 'Departments/Form': DepartmentForm, 'Employees/Index': EmployeeIndex, 'Employees/Form': EmployeeForm, 'Employees/Import': EmployeeImport };
 createInertiaApp({
   resolve: name => {
     if (!pages[name]) throw new Error(`Página desconhecida: ${name}`);

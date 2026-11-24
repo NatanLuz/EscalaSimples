@@ -4,7 +4,9 @@ use App\Http\Controllers\Auth\AuthenticationController;
 use App\Http\Controllers\Auth\RegistrationController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\DepartmentController;
+use App\Http\Controllers\EmployeeBulkController;
 use App\Http\Controllers\EmployeeController;
+use App\Http\Controllers\EmployeeImportController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
@@ -25,5 +27,10 @@ Route::middleware('auth')->group(function () {
     Route::get('/dashboard', DashboardController::class)->name('dashboard');
     Route::post('/logout', [AuthenticationController::class, 'destroy'])->name('logout');
     Route::resource('setores', DepartmentController::class)->parameters(['setores' => 'department'])->except(['show', 'destroy'])->names('departments');
+    Route::get('/colaboradores/importar', [EmployeeImportController::class, 'create'])->name('employees.import');
+    Route::get('/colaboradores/modelo-csv', [EmployeeImportController::class, 'template'])->name('employees.template');
+    Route::post('/colaboradores/importar/previa', [EmployeeImportController::class, 'preview'])->name('employees.import.preview');
+    Route::post('/colaboradores/importar/confirmar', [EmployeeImportController::class, 'confirm'])->name('employees.import.confirm');
+    Route::post('/colaboradores/lote', EmployeeBulkController::class)->name('employees.bulk');
     Route::resource('colaboradores', EmployeeController::class)->parameters(['colaboradores' => 'employee'])->except(['show', 'destroy'])->names('employees');
 });

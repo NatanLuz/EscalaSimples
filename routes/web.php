@@ -7,6 +7,8 @@ use App\Http\Controllers\DepartmentController;
 use App\Http\Controllers\EmployeeBulkController;
 use App\Http\Controllers\EmployeeController;
 use App\Http\Controllers\EmployeeImportController;
+use App\Http\Controllers\SchedulingController;
+use App\Http\Controllers\WorkPatternController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
@@ -33,4 +35,9 @@ Route::middleware('auth')->group(function () {
     Route::post('/colaboradores/importar/confirmar', [EmployeeImportController::class, 'confirm'])->name('employees.import.confirm');
     Route::post('/colaboradores/lote', EmployeeBulkController::class)->name('employees.bulk');
     Route::resource('colaboradores', EmployeeController::class)->parameters(['colaboradores' => 'employee'])->except(['show', 'destroy'])->names('employees');
+    Route::resource('jornadas', WorkPatternController::class)->parameters(['jornadas' => 'pattern'])->except(['show', 'destroy'])->names('patterns');
+    Route::get('/atribuicoes', [SchedulingController::class, 'index'])->name('assignments.index');
+    Route::post('/atribuicoes', [SchedulingController::class, 'store'])->name('assignments.store');
+    Route::post('/atribuicoes/{assignment}/encerrar', [SchedulingController::class, 'end'])->name('assignments.end');
+    Route::post('/excecoes', [SchedulingController::class, 'override'])->name('overrides.store');
 });

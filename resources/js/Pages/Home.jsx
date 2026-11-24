@@ -9,7 +9,11 @@ export default function Home({ mensagem }) {
     <div className="mt-10 rounded-xl border border-slate-700 bg-slate-800 p-6">
       <p className="font-medium text-emerald-300">Fundação em desenvolvimento</p>
       <p className="mt-2 text-slate-300">{mensagem}</p>
-      <Link href="/sobre" className="mt-5 inline-block text-sm font-semibold text-emerald-400 underline underline-offset-4">Conheça esta etapa</Link>
+      <div className="mt-5 flex flex-wrap gap-5 text-sm font-semibold">
+        <Link href="/login" className="text-emerald-400 underline underline-offset-4">Entrar</Link>
+        <Link href="/cadastro" className="text-emerald-400 underline underline-offset-4">Cadastrar empresa</Link>
+        <Link href="/sobre" className="text-slate-300 underline underline-offset-4">Sobre</Link>
+      </div>
     </div>
   </main>;
 }

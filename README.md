@@ -1,6 +1,6 @@
 # EscalaSimples
 
-Fundação de uma aplicação web para organizar escalas de trabalho e folgas. Esta etapa demonstra a integração técnica; autenticação, isolamento entre empresas e funcionalidades de escala ainda não foram implementados.
+Aplicação web em desenvolvimento para organizar escalas de trabalho e folgas. O cadastro de empresa, login por sessão e painel inicial estão disponíveis; as funcionalidades de escala ainda não foram implementadas.
 
 ## Tecnologias e requisitos
 
@@ -40,8 +40,8 @@ Essa proteção cobre os testes Laravel que estendem `Tests\TestCase`; não prot
 
 ## Decisões e próximos passos
 
-Cada empresa tem no máximo um usuário administrador no MVP; a restrição única em `users.company_id` deverá ser revista quando houver suporte a mais contas. A criação de empresa e administrador ocorre em transação no serviço `CreateCompanyWithAdministrator`, que recebe dados já validados. Não há autenticação ou autorização implementadas nesta etapa.
+Cada empresa tem no máximo um usuário administrador no MVP; a restrição única em `users.company_id` deverá ser revista quando houver suporte a mais contas. A criação de empresa e administrador ocorre em transação no serviço `CreateCompanyWithAdministrator`, que recebe dados já validados. O painel obtém a empresa pelo usuário autenticado. O acesso usa sessão Laravel e a limitação de tentativas de login utiliza o cache configurado. Recuperação de acesso por e-mail ainda não está disponível.
 
 As migrations de empresas recusam a execução se houver usuários existentes; nesses casos é necessário planejar a associação dos registros antes de aplicar as mudanças. Execute migrations apenas após confirmar o banco de destino e seu conteúdo.
 
-O projeto é um monólito Laravel com React integrado por Inertia, sem API separada e sem Vite. Nenhum dado real deve ser usado enquanto autenticação e isolamento por empresa não forem implementados e testados. A próxima etapa recomendada é implementar autenticação e comprovar o isolamento entre empresas com testes automatizados.
+O projeto é um monólito Laravel com React integrado por Inertia, sem API separada e sem Vite. O painel tem testes de isolamento entre duas empresas; os futuros recursos devem ter suas próprias consultas autorizadas e testes de acesso cruzado. A suíte ainda não valida a integração em MySQL e a aplicação permanece em desenvolvimento com dados fictícios.

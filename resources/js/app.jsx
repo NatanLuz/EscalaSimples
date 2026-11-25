@@ -14,8 +14,11 @@ import EmployeeImport from './Pages/Employees/Import.jsx';
 import PatternIndex from './Pages/WorkPatterns/Index.jsx';
 import PatternForm from './Pages/WorkPatterns/Form.jsx';
 import PatternAssignments from './Pages/WorkPatterns/Assignments.jsx';
+import CalendarIndex from './Pages/Calendar/Index.jsx';
+import HolidayIndex from './Pages/Holidays/Index.jsx';
+import ScheduleEditor from './Pages/ScheduleEditor/Index.jsx';
 
-const pages = { Home, Sobre, 'Auth/Login': Login, 'Auth/Register': Register, Dashboard, 'Departments/Index': DepartmentIndex, 'Departments/Form': DepartmentForm, 'Employees/Index': EmployeeIndex, 'Employees/Form': EmployeeForm, 'Employees/Import': EmployeeImport, 'WorkPatterns/Index': PatternIndex, 'WorkPatterns/Form': PatternForm, 'WorkPatterns/Assignments': PatternAssignments };
+const pages = { Home, Sobre, 'Auth/Login': Login, 'Auth/Register': Register, Dashboard, 'Departments/Index': DepartmentIndex, 'Departments/Form': DepartmentForm, 'Employees/Index': EmployeeIndex, 'Employees/Form': EmployeeForm, 'Employees/Import': EmployeeImport, 'WorkPatterns/Index': PatternIndex, 'WorkPatterns/Form': PatternForm, 'WorkPatterns/Assignments': PatternAssignments, 'Calendar/Index': CalendarIndex, 'Holidays/Index': HolidayIndex, 'ScheduleEditor/Index': ScheduleEditor };
 createInertiaApp({
   resolve: name => {
     if (!pages[name]) throw new Error(`Página desconhecida: ${name}`);

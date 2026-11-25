@@ -2,11 +2,14 @@
 
 use App\Http\Controllers\Auth\AuthenticationController;
 use App\Http\Controllers\Auth\RegistrationController;
+use App\Http\Controllers\CalendarController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\DepartmentController;
 use App\Http\Controllers\EmployeeBulkController;
 use App\Http\Controllers\EmployeeController;
 use App\Http\Controllers\EmployeeImportController;
+use App\Http\Controllers\HolidayController;
+use App\Http\Controllers\ScheduleEditorController;
 use App\Http\Controllers\SchedulingController;
 use App\Http\Controllers\WorkPatternController;
 use Illuminate\Support\Facades\Route;
@@ -27,6 +30,13 @@ Route::middleware('guest')->group(function () {
 
 Route::middleware('auth')->group(function () {
     Route::get('/dashboard', DashboardController::class)->name('dashboard');
+    Route::get('/minhas-escalas', [ScheduleEditorController::class, 'index'])->name('schedule.editor');
+    Route::post('/minhas-escalas', [ScheduleEditorController::class, 'store'])->name('schedule.save');
+    Route::get('/escalas', CalendarController::class)->name('calendar.index');
+    Route::get('/feriados', [HolidayController::class, 'index'])->name('holidays.index');
+    Route::post('/feriados', [HolidayController::class, 'store'])->name('holidays.store');
+    Route::put('/feriados/localidade', [HolidayController::class, 'location'])->name('holidays.location');
+    Route::put('/feriados/{holiday}', [HolidayController::class, 'update'])->name('holidays.update');
     Route::post('/logout', [AuthenticationController::class, 'destroy'])->name('logout');
     Route::resource('setores', DepartmentController::class)->parameters(['setores' => 'department'])->except(['show', 'destroy'])->names('departments');
     Route::get('/colaboradores/importar', [EmployeeImportController::class, 'create'])->name('employees.import');

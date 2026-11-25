@@ -9,6 +9,11 @@ use Illuminate\Support\Collection;
 
 class ScheduleCalculator
 {
+    public function weeklyStatus(CarbonImmutable $date, array $daysOff): string
+    {
+        return in_array($date->dayOfWeekIso - 1, $daysOff, true) ? 'off' : 'work';
+    }
+
     /** @return array<int, array<string, array{status: string, starts_at: ?string, ends_at: ?string, ends_next_day: bool}>> */
     public function calculate(int $companyId, array $employeeIds, string $from, string $to): array
     {

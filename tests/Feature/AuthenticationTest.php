@@ -26,7 +26,7 @@ class AuthenticationTest extends TestCase
             'password' => 'senha-ficticia', 'password_confirmation' => 'senha-ficticia', 'company_id' => $other->id,
         ]);
 
-        $response->assertRedirect('/dashboard');
+        $response->assertRedirect('/minhas-escalas');
         $user = User::where('email', 'ana@example.test')->firstOrFail();
         $this->assertAuthenticatedAs($user);
         $this->assertNotEquals($before, session()->getId());
@@ -78,7 +78,7 @@ class AuthenticationTest extends TestCase
         $user = User::factory()->create(['email' => 'ana@example.test', 'password' => 'senha-ficticia']);
         $this->withSession(['before_login' => true]);
         $before = session()->getId();
-        $this->post('/login', ['email' => 'ANA@EXAMPLE.TEST', 'password' => 'senha-ficticia'])->assertRedirect('/dashboard');
+        $this->post('/login', ['email' => 'ANA@EXAMPLE.TEST', 'password' => 'senha-ficticia'])->assertRedirect('/minhas-escalas');
         $this->assertAuthenticatedAs($user);
         $this->assertNotEquals($before, session()->getId());
     }

@@ -1,6 +1,6 @@
 # EscalaSimples
 
-Aplicação web em desenvolvimento para organizar escalas de trabalho e folgas. O cadastro de empresa, login por sessão e painel inicial estão disponíveis; as funcionalidades de escala ainda não foram implementadas.
+Aplicação web em desenvolvimento para organizar escalas de trabalho e folgas, com cadastro de empresas, colaboradores, jornadas, calendário mensal e datas especiais.
 
 ## Tecnologias e requisitos
 
@@ -65,3 +65,21 @@ Alterar um padrão cria uma nova versão; atribuições já feitas continuam lig
 O encerramento exige motivo e registra usuário, empresa, datas anteriores e novas e horário da alteração. O cálculo identifica um turno que termina no dia seguinte com `ends_next_day`; a situação de cada data se refere ao início do turno, não às horas trabalhadas em cada data. Horários devem ser informados em pares diferentes e exigem ao menos um dia de trabalho. O nome do padrão não determina a duração: para representar 12x36, o gestor deve conferir a sequência e informar um turno de 12 horas.
 
 Os testes manuais de MariaDB exigem a conexão local `mysql` e o banco exclusivo `escalasimples_test`, com as migrations aplicadas. No PowerShell, use `$env:DB_DATABASE='escalasimples_test'` e execute `php tests/Integration/MariaDbConstraints.php` e `php tests/Integration/MariaDbConcurrency.php`. O primeiro reverte seus dados; o segundo mantém empresas e registros fictícios identificados no banco de testes para permitir conexões concorrentes e inspeção posterior. Nunca execute esses testes no banco de desenvolvimento.
+
+## Calendário e feriados
+
+A tela inicial de escalas permite montar uma escala mensal e salvar todas as alterações em uma transação. Colaboradores digitados são cadastrados somente ao salvar; remover alguém da escala não exclui o cadastro. A escala salva mantém revisões e rejeita uma gravação com versão desatualizada. Ao adicionar colaboradores existentes, a tela usa as jornadas e exceções anteriores como ponto de partida; os dias sem escala usam as folgas padrão selecionadas.
+
+As escalas mensais salvas são registros próprios e não alteram as jornadas recorrentes nem as exceções históricas. Para um mês salvo, o calendário administrativo e seus indicadores usam os dias registrados na escala mensal. A edição desse mês ocorre no editor mensal. O histórico mensal registra trabalho e folga, mas ainda não congela os horários dos turnos: a consulta administrativa usa os horários das jornadas disponíveis no momento da consulta.
+
+Se o mês selecionado ainda não possui escala e o mês imediatamente anterior foi salvo, o editor apresenta um rascunho reaproveitado com colaboradores ativos, modelo e folgas padrão. Dias são recalculados para o novo período; ajustes pontuais do mês anterior não são copiados. O gestor pode começar do zero e deve salvar o rascunho para persistir o mês. Escalas já salvas não são substituídas automaticamente.
+
+Na grade, clique no nome de um colaborador para configurar folgas semanais individuais recorrentes e clique nas células para fazer ajustes pontuais. As folgas individuais são registradas na escala mensal e consideradas no reaproveitamento seguinte; não são convertidas automaticamente em atribuições administrativas de jornada. Ajustes pontuais de escalas antigas não são presumidos recorrentes. O salvamento preserva as revisões e recusa alterações concorrentes baseadas em revisão desatualizada.
+
+A página de escalas calcula o mês para até 20 colaboradores por página a partir das versões de jornadas, vigências e exceções existentes. O filtro por padrão inclui qualquer atribuição que tenha vigorado no mês. Os indicadores podem abranger a página, o conjunto filtrado ou toda a empresa e representam programação, não presença. Na cobertura diária por setor, uma pessoa cujo turno da data anterior continua após a meia-noite também é considerada, sem contagem duplicada no mesmo setor. Turnos sem horário não permitem inferir continuidade.
+
+A validação da implementação atual do editor mensal e de suas migrations em MariaDB e MySQL permanece pendente. Os testes automatizados usuais usam SQLite em memória e não substituem a validação desses mecanismos.
+
+As datas nacionais incorporadas valem apenas para 2026 e reproduzem os feriados identificados na [Portaria MGI nº 11.460/2025](https://legis.sigepe.gov.br/sigepe-bgp-ws-legis/legis-service/download/?id=0026440285-ALPDF%2F2025), destinada à administração pública federal. A inclusão no calendário é informativa e não determina folga para a empresa privada. Não há base automática para os demais anos ou para feriados estaduais e municipais; cadastre essas datas manualmente após verificar a fonte pertinente. É possível registrar a URL da fonte e distinguir feriado de ponto facultativo. Datas estaduais e municipais dependem da UF e do município configurados para a empresa e de correspondência do nome informado. Não há consulta externa em tempo real.
+
+Após confirmar o destino do MariaDB de testes e aplicar nele a migration pendente, execute `php tests/Integration/HolidayConstraints.php` com `DB_DATABASE=escalasimples_test`. Esse teste verifica unicidade e chave estrangeira dentro de uma transação revertida. Não execute o teste em bancos de desenvolvimento ou produção.

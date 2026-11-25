@@ -72,7 +72,13 @@ class SchedulingController extends Controller
         $data = $request->validate(['employee' => ['required', 'ulid'], 'date' => ['required', 'date_format:Y-m-d'], 'is_work' => ['required', 'boolean'], 'reason' => ['required', 'string', 'max:255']]);
         $employee = Employee::where('company_id', $request->user()->company_id)->where('public_id', $data['employee'])->firstOrFail();
         Gate::authorize('update', $employee);
-        ScheduleOverride::create(['company_id' => $employee->company_id, 'employee_id' => $employee->id, 'date' => $data['date'], 'is_work' => $data['is_work'], 'reason' => trim($data['reason'])]);
+        DB::transaction(function () use ($employee, $data) {
+            DB::table('companies')->where('id', $employee->company_id)->lockForUpdate()->first();
+            if (DB::table('monthly_schedules')->where('company_id', $employee->company_id)->where('month', substr($data['date'], 0, 7))->exists()) {
+                throw ValidationException::withMessages(['date' => 'Altere esta escala pelo editor mensal.']);
+            }
+            ScheduleOverride::create(['company_id' => $employee->company_id, 'employee_id' => $employee->id, 'date' => $data['date'], 'is_work' => $data['is_work'], 'reason' => trim($data['reason'])]);
+        });
 
         return back()->with('success', 'Exceção registrada.');
     }

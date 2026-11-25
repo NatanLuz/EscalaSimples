@@ -40,6 +40,6 @@ class RegistrationController extends Controller
         Auth::login($company->user);
         $request->session()->regenerate();
 
-        return redirect()->route('dashboard');
+        return redirect()->route('schedule.editor');
     }
 }

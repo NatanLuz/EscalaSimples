@@ -46,7 +46,7 @@ class AuthenticationController extends Controller
         RateLimiter::clear($key);
         $request->session()->regenerate();
 
-        return redirect()->intended(route('dashboard'));
+        return redirect()->route('schedule.editor');
     }
 
     public function destroy(Request $request): RedirectResponse

@@ -32,11 +32,43 @@ Em terminais separados, execute `php artisan serve` e `npm run dev`, e abra `htt
 
 O esbuild agrupa JSX e JavaScript; o Tailwind CLI gera o CSS. O Blade carrega os arquivos produzidos e um hash de ambos é usado para versionar os assets do Inertia e invalidar o cache. A resolução de páginas é explícita, adequada à base atual. Não há hot module replacement nem integração automática com o manifesto Vite; expansão para divisão de bundles e atualização em tempo real exigirá configuração adicional.
 
+## MySQL local isolado com Docker
+
+A configuração `compose.yaml` prepara uma instância exclusiva MySQL 8.4, publicada somente em `127.0.0.1:3309`, com o volume persistente `escalasimples-local-mysql-data`. O script de inicialização cria os bancos `escalasimples` e `escalasimples_test` e os usuários `escala_dev` e `escala_test`, com permissões apenas em seus respectivos bancos. A inicialização automática ocorre somente quando o volume está vazio; alterar credenciais depois não modifica usuários já criados.
+
+Instale Docker Desktop com Docker Compose e crie `.env.docker` com três senhas hexadecimais aleatórias diferentes, com pelo menos 32 caracteres. O arquivo `.env.docker.example` mostra as variáveis esperadas. Para gerar um arquivo novo no PowerShell, sem sobrescrever um existente:
+
+```powershell
+if (Test-Path .env.docker) { throw 'Arquivo .env.docker já existe.' }
+$rng = [System.Security.Cryptography.RandomNumberGenerator]::Create()
+$values = foreach ($i in 1..3) {
+    $bytes = New-Object byte[] 32
+    $rng.GetBytes($bytes)
+    ([BitConverter]::ToString($bytes) -replace '-', '').ToLowerInvariant()
+}
+$rng.Dispose()
+$lines = ('MYSQL_ROOT_PASSWORD={0}' -f $values[0]), ('ESCALA_DEV_PASSWORD={0}' -f $values[1]), ('ESCALA_TEST_PASSWORD={0}' -f $values[2])
+[System.IO.File]::WriteAllLines((Join-Path (Get-Location).Path '.env.docker'), [string[]]$lines)
+```
+
+Esse arquivo contém segredos e é ignorado pelo Git. No PowerShell, inicie e consulte a instância com:
+
+```powershell
+docker compose --env-file .env.docker up -d
+docker compose --env-file .env.docker ps
+```
+
+Para usar o banco de desenvolvimento, preserve seu `.env` anterior e configure nele `DB_HOST=127.0.0.1`, `DB_PORT=3309`, `DB_DATABASE=escalasimples`, `DB_USERNAME=escala_dev` e `DB_PASSWORD` com a senha de desenvolvimento do arquivo local. Confirme o servidor, o usuário e o banco antes de executar `php artisan migrate`. Não use o usuário root na aplicação. A suíte PHPUnit continua usando SQLite em memória.
+
+Para executar a suíte MySQL exclusiva, use `powershell -ExecutionPolicy Bypass -File scripts/mysql-integration.ps1 -Migrate`. O script valida o container saudável, o servidor, a porta, o banco e a conta de teste antes de aplicar migrations pendentes e iniciar os testes. A suíte verifica permissões, constraints, fluxos HTTP e concorrência do salvamento mensal usando conexões independentes. O teste de concorrência mantém empresas e colaboradores fictícios identificados no banco de testes. O teste anterior de concorrência foi escrito para MariaDB e usa tabelas de diagnóstico indisponíveis da mesma forma no MySQL 8.4; ele não é chamado pelo roteiro. A suíte MySQL é complementar e não substitui todos os testes SQLite.
+
+Para parar ou iniciar novamente sem apagar dados, use `docker compose --env-file .env.docker stop` e `docker compose --env-file .env.docker start`. O volume contém os dados persistentes: não use `down -v`, `docker volume rm` ou limpeza de volumes sem backup e autorização. O container e as migrations desta configuração precisam ser validados no ambiente antes de serem considerados prontos para uso.
+
 ## Testes
 
 Execute `php artisan test` e `vendor/bin/pint --test` (no Windows, `vendor\bin\pint.bat --test`). A suíte usa SQLite em memória, com `pdo_sqlite`, e define as variáveis de teste em `phpunit.xml`. A classe base valida o ambiente e a conexão antes dos recursos como `RefreshDatabase` e disponibiliza apenas a conexão SQLite aos testes Laravel. Variáveis externas conflitantes ou cache de configuração de outro ambiente podem causar uma interrupção de segurança: remova as variáveis conflitantes e, se necessário, o cache com `php artisan config:clear`.
 
-Essa proteção cobre os testes Laravel que estendem `Tests\TestCase`; não protege comandos Artisan manuais, conexões criadas diretamente ou testes que modifiquem a configuração após a validação. Nunca execute `migrate:fresh`, `db:wipe` ou equivalentes em bancos existentes sem verificar o destino e obter autorização. SQLite não reproduz integralmente tipos, índices, constraints e comportamento do MySQL; uma futura suíte de integração deverá usar um banco MySQL de teste exclusivo, com proteção própria e credenciais limitadas. A suíte atual não valida a conexão MySQL. A renderização visual deve ser verificada também no navegador.
+Essa proteção cobre os testes Laravel que estendem `Tests\TestCase`; não protege comandos Artisan manuais, conexões criadas diretamente ou testes que modifiquem a configuração após a validação. Nunca execute `migrate:fresh`, `db:wipe` ou equivalentes em bancos existentes sem verificar o destino e obter autorização. SQLite não reproduz integralmente tipos, índices, constraints e comportamento do MySQL. A suíte MySQL separada usa um banco exclusivo e valida explicitamente o destino, mas é complementar à suíte SQLite. A renderização visual deve ser verificada também no navegador.
 
 ## Decisões e próximos passos
 
@@ -44,7 +76,7 @@ Cada empresa tem no máximo um usuário administrador no MVP; a restrição úni
 
 As migrations de empresas recusam a execução se houver usuários existentes; nesses casos é necessário planejar a associação dos registros antes de aplicar as mudanças. Execute migrations apenas após confirmar o banco de destino e seu conteúdo.
 
-O projeto é um monólito Laravel com React integrado por Inertia, sem API separada e sem Vite. O painel tem testes de isolamento entre duas empresas; os futuros recursos devem ter suas próprias consultas autorizadas e testes de acesso cruzado. A suíte ainda não valida a integração em MySQL e a aplicação permanece em desenvolvimento com dados fictícios.
+O projeto é um monólito Laravel com React integrado por Inertia, sem API separada e sem Vite. O painel tem testes de isolamento entre duas empresas; os futuros recursos devem ter suas próprias consultas autorizadas e testes de acesso cruzado. A aplicação permanece em desenvolvimento com dados fictícios.
 
 Setores e colaboradores são associados à empresa autenticada. Nomes de setores são normalizados removendo espaços excedentes e comparando letras sem diferenciar maiúsculas de minúsculas; acentos permanecem significativos. Um setor inativo permanece nos colaboradores já vinculados, mas não pode receber novos vínculos. Colaboradores podem ficar sem setor e nomes repetidos são permitidos. A chave estrangeira composta impede vínculos entre empresas; não há exclusão de setores ou colaboradores na interface.
 
@@ -78,7 +110,7 @@ Na grade, clique no nome de um colaborador para configurar folgas semanais indiv
 
 A página de escalas calcula o mês para até 20 colaboradores por página a partir das versões de jornadas, vigências e exceções existentes. O filtro por padrão inclui qualquer atribuição que tenha vigorado no mês. Os indicadores podem abranger a página, o conjunto filtrado ou toda a empresa e representam programação, não presença. Na cobertura diária por setor, uma pessoa cujo turno da data anterior continua após a meia-noite também é considerada, sem contagem duplicada no mesmo setor. Turnos sem horário não permitem inferir continuidade.
 
-A validação da implementação atual do editor mensal e de suas migrations em MariaDB e MySQL permanece pendente. Os testes automatizados usuais usam SQLite em memória e não substituem a validação desses mecanismos.
+As migrations e os cenários cobertos pela suíte MySQL foram validados no MySQL 8.4.13 do container exclusivo. Essa suíte não cobre integralmente todos os testes SQLite. A validação da implementação atual no MariaDB continua pendente; SQLite em memória não substitui a validação desses mecanismos.
 
 As datas nacionais incorporadas valem apenas para 2026 e reproduzem os feriados identificados na [Portaria MGI nº 11.460/2025](https://legis.sigepe.gov.br/sigepe-bgp-ws-legis/legis-service/download/?id=0026440285-ALPDF%2F2025), destinada à administração pública federal. A inclusão no calendário é informativa e não determina folga para a empresa privada. Não há base automática para os demais anos ou para feriados estaduais e municipais; cadastre essas datas manualmente após verificar a fonte pertinente. É possível registrar a URL da fonte e distinguir feriado de ponto facultativo. Datas estaduais e municipais dependem da UF e do município configurados para a empresa e de correspondência do nome informado. Não há consulta externa em tempo real.
 

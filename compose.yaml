@@ -1,0 +1,27 @@
+name: escalasimples-local
+
+services:
+  mysql:
+    image: mysql:8.4
+    container_name: escalasimples-mysql-local
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:3309:3306"
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:?Defina as credenciais locais}
+      ESCALA_DEV_PASSWORD: ${ESCALA_DEV_PASSWORD:?Defina as credenciais locais}
+      ESCALA_TEST_PASSWORD: ${ESCALA_TEST_PASSWORD:?Defina as credenciais locais}
+    command: ["--character-set-server=utf8mb4", "--collation-server=utf8mb4_0900_ai_ci"]
+    volumes:
+      - escalasimples-mysql-data:/var/lib/mysql
+      - ./docker/mysql/init:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ["CMD-SHELL", "MYSQL_PWD=\"$$MYSQL_ROOT_PASSWORD\" mysql -h 127.0.0.1 -u root --batch --skip-column-names -e 'SELECT 1' >/dev/null 2>&1"]
+      interval: 10s
+      timeout: 5s
+      retries: 18
+      start_period: 30s
+
+volumes:
+  escalasimples-mysql-data:
+    name: escalasimples-local-mysql-data

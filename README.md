@@ -1,4 +1,4 @@
-# EscalaSimples
+# EscalaSimples Projeto para organizar escalas de trabalho
 
 Aplicação web em desenvolvimento para organizar escalas de trabalho e folgas, com cadastro de empresas, colaboradores, jornadas, calendário mensal e datas especiais.
 
